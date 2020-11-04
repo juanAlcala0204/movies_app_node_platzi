@@ -1,0 +1,136 @@
+************************** Pasos para crear la base del proyecto MOVIES API ( APLICACIÓN BACKEND ) *****************************************
+
+
+Primer Paso:
+
+    Crear el package.json, se puede crear con:
+        npm init -y ( Esto ocasiona o es la analogía a decirle sí a todo )
+
+Segundo Paso:
+
+    Se modifica el package.json en el atributo scripts, dentro de este se crear un sub-atributo llamado "dev" : "DEBUG= app* nodemon index" ( Se entiende que 
+    ejecutara el ambiente de Desarrollo).
+
+    como otro paso adicional aquí se crea también otro sub-atributo en scripts llamado "start": "NODE_ENV=production node index" ( Se entiende que
+    ejecutara el ambiente de Producción).
+
+    Deberá quedar así:
+        
+        "scripts": {
+            "dev": "DEBUG=app:* nodemon index",
+            "start": "NODE_ENV=production node index"
+        }
+
+        Para Windows:
+
+        "scripts": {
+            "dev": "set DEBUG=app:* && nodemon index",
+            "start": "set NODE_ENV=production && node index"
+        }
+
+        Si se desea hacer una configuración global para que funcione en cualquier SO ( System Operation )
+
+        => Instalar cross-env :
+            
+            npm i cross-env
+
+            Los scripts quedarían de la siguiente manera:
+
+            "scripts": {
+                "dev": "cross-env DEBUG=app:* nodemon index",
+                "start": "cross-env NODE_ENV=production node index"
+            }   
+
+Tercer Paso:
+
+    Se utilizará ESLint, se procederá a crear un archivo en la raíz del proyecto, llamada .eslint.json dentro de esta crearemos la configuración ESLint de nuestra
+    app.
+
+    .eslintrc.json ( dentro del archivo ) =>
+
+            {
+                // Se especifica que todo mi código usará el EcmaScript 6 para adelante.
+                "parseOptions": {
+                    "ecmaVersion": 2018
+                },
+                // Se especifica que daremos uso a una configuración prettier
+                "extends": ["eslint:recommended", "prettier"],
+                // Se especifica que utilizaremos variables de entorno de es6, node y mocha. Esto para que más adelante ESLint no nos arroje error
+                "env": {
+                    "es6": true,
+                    "node": true,
+                    "mocha": true
+                },
+                // Se especifica que la regla de no-console osea de no poner la consola en nuestro código no será un error, si no un warning
+                "rules": {
+                    "no-console": "warn"
+                }
+            }
+
+Cuarto Paso:
+
+    Se crear un archivo de configuración .prettierrc.json el cuál nos servirá para ordenarle al código que en el momento que los desarrolladores hagan commit
+    el código se formatee de la manera en que lo especifiquemos dentro de esta configuración
+
+    .prettierrc.json ( dentro del archivo ) =>
+
+            {
+                // regla que especifica que el espacio de los tabs sean 2
+                "tabWidth": 2,
+                // regla que especifica que el código tendrá punto y comas
+                "semi": true,
+                // regla que especifica que se usará las comillas a ( ' ' ) comillas simples
+                "singleQuote": true
+            }
+
+Quinto Paso ( importar dependencias ):
+
+    1. npm i express dotenv
+
+        => Se importa la librería express
+        => Se importa la utilidad dotenv ( manejo de variables de entorno )
+
+        1. importar Dependencias de Desarrollo:
+
+            npm i -D nodemon eslint eslint-config-prettier eslint-plugin-prettier prettier
+
+                => Se importan dependencias de nodemon, eslint, el plugin eslint-prettier para usar nuestra configuración prettier,                                 
+                   y por último la librería prettier
+
+            npx mrm lint-staged
+
+                => Hook encargado de realizar el formateo aútomatico de la aplicación una vez se realice el commit.
+
+
+Sexto Paso ( Creación de archivo de configuración del proyecto ):
+
+    Se crea una carpeta en la raíz del proyecto llamado config dentro de esta un archivo index.js
+
+    index.js (Dentro del archivo):
+
+        require('dotenv').config();
+
+        // Se crea objeto de configuración.
+        const config = {
+            // Variable que comprueba si está en producción o en desarrollo
+            dev: process.env.NODE_ENV !== 'production',
+            // Variable de entorno port.
+            port: process.env.PORT || 3000
+        };
+
+        module.exports = { config };
+
+Septimo Paso ( Creación del archivo del código creacional del servidor ):
+
+    se crea un archivo index.js en la raíz de nuestro proyecto.
+
+    index.js (Dentro del archivo):
+
+        const express = require('express');
+        const app = express();
+
+        const { config } = require('./config/index');
+
+        app.listen( config.port, function() {
+            console.log(`Listening http://localhost:${config.port}`);
+        });
