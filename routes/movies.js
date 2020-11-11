@@ -1,5 +1,14 @@
 const express = require('express');
 const MoviesService = require('../services/movies');
+const joi = require('@hapi/joi');
+
+const {
+    movieIdSchema,
+    createMovieSchema,
+    updateMovieSchema
+} = require('../utils/schemas/movies');
+
+const validationHandler = require('../utils/middleware/validationHandler');
 
 function moviesApi(app) {
     const router = express.Router();
@@ -15,14 +24,14 @@ function moviesApi(app) {
 
             res.status(200).json({
                 data: movies,
-                message: 'movie retrived'
+                message: 'movies listed'
             })
         } catch (error) {
             next(error);
         }
     });
 
-    router.get('/:movieId', async function (req, res, next) {
+    router.get('/:movieId', validationHandler(joi.object({ movieId: movieIdSchema }), 'params'), async function (req, res, next) {
         try {
             const { movieId } = req.params;
 
@@ -37,7 +46,7 @@ function moviesApi(app) {
         }
     });
 
-    router.post('/', async function (req, res, next) {
+    router.post('/', validationHandler(createMovieSchema), async function (req, res, next) {
         try {
             const { body: movie } = req;
 
@@ -52,12 +61,12 @@ function moviesApi(app) {
         }
     });
 
-    router.put('/:movieId', async function (req, res, next) {
+    router.put('/:movieId', validationHandler(joi.object({ movieId: movieIdSchema }), 'params'), validationHandler(updateMovieSchema), async function (req, res, next) {
         try {
             const { movieId } = req.params;
             const { body: movie } = req;
 
-            const updatedMovieId = await  moviesService.updateMovie({ movieId, movie });
+            const updatedMovieId = await moviesService.updateMovie({ movieId, movie });
 
             res.status(200).json({
                 data: updatedMovieId,
@@ -68,7 +77,7 @@ function moviesApi(app) {
         }
     });
 
-    router.delete('/:movieId', async function (req, res, next) {
+    router.delete('/:movieId', validationHandler(joi.object({ movieId: movieIdSchema }), 'params'), async function (req, res, next) {
         try {
             const { movieId } = req.params;
 
